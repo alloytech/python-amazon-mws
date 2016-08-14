@@ -69,9 +69,8 @@ class MWSError(Exception):
 def calc_md5(string):
     """Calculates the MD5 encryption for the given string
     """
-    md = hashlib.md5()
-    md.update(string)
-    return base64.encodestring(md.digest()).strip('\n')
+    md = hashlib.md5(string.encode('latin1')).digest()
+    return base64.b64encode(md).decode('latin1').strip('\n')
 
 
 def remove_empty(d):
