@@ -66,11 +66,12 @@ class MWSError(Exception):
     response = None
 
 
-def calc_md5(string):
+def calc_md5(string, encoding):
     """Calculates the MD5 encryption for the given string
     """
-    md = hashlib.md5(string.encode('latin1')).digest()
-    return base64.b64encode(md).decode('latin1').strip('\n')
+    encoding = encoding or 'latin1'
+    md = hashlib.md5(string.encode(encoding)).digest()
+    return base64.b64encode(md).decode(encoding).strip('\n')
 
 
 def remove_empty(d):
@@ -113,9 +114,13 @@ class DataWrapper(object):
     def __init__(self, data, header):
         self.original = data
         if 'content-md5' in header:
-            hash_ = calc_md5(self.original)
+            content_type = header.get('Content-Type', '')
+            content_type = content_type.split('charset=')
+            encoding = content_type[1] if len(content_type) > 1 else None
+            hash_ = calc_md5(self.original, encoding)
             if header['content-md5'] != hash_:
                 raise MWSError("Wrong Contentlength, maybe amazon error...")
+
 
     @property
     def parsed(self):
